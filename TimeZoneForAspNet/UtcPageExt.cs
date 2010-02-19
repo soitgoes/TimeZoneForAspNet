@@ -9,22 +9,31 @@ namespace Cprieto.Utils
         private const string CookieName = "TimeZoneOffset";
 
         public static DateTime LocalTimeFromTimeOffset(this Page page, DateTime utcTime) {
-            var request = page.Request;
-            if (IsCookieDefined(request)) {
-                var offset = GetUtcOffset(request);
-                return utcTime.AddMinutes(offset);
-            }
-            return utcTime;
+        	return page.Request.LocalTimeFromTimeOffset(utcTime);
         }
 
+		public static DateTime LocalTimeFromTimeOffset(this HttpRequest request, DateTime utcTime)
+		{
+			if (IsCookieDefined(request))
+			{
+				var offset = GetUtcOffset(request);
+				return utcTime.AddMinutes(offset);
+			}
+			return utcTime;
+		}
+
+		public static int UtcOffset(this HttpRequest request)
+		{
+			if (IsCookieDefined(request))
+			{
+				var minOffset = GetUtcOffset(request);
+				return minOffset / 60; // return offset in hours, not minutes
+			}
+			return 0;
+		}
         public static int UtcOffset(this Page page)
         {
-            var request = page.Request;
-            if (IsCookieDefined(request)) {
-                var minOffset = GetUtcOffset(request);
-                return minOffset/60; // return offset in hours, not minutes
-            }
-            return 0;
+            return UtcOffset( page.Request);
         }
 
         private static bool IsCookieDefined(HttpRequest request) {
